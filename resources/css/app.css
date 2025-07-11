@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none;
+}
+
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    /* border: 1px solid black; */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Header Styling --- */
+header {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.nav-container {
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-container h1 {
+    font-size: 1.8rem;
+}
+
+/* --- Main Content Styling --- */
+.content {
+    flex-grow: 1; /* Memastikan main content mengisi ruang yang tersedia */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+}
+
+/* --- Login Container Styling --- */
+.login-container {
+    background-color: #ffffff; /* Latar belakang putih untuk form */
+    padding: 40px;
+    border-radius: 50px; /* Sudut membulat */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Bayangan yang lebih menonjol */
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column; /* Mengatur item secara vertikal */
+    align-items: center;   /* Menengahkan item secara horizontal (h2, form) */
+}
+
+.login-container h2 {
+    margin-bottom: 1rem;
+    color: #343a40;
+    text-align: center;
+    width: 100%;
+    font-size: 2rem;
+}
+
+.login-container form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-weight: bold;
+    color: #495057;
+    width: 100%;
+    margin: 0.5rem;
+
+}
+
+.form-control {
+    border-radius: 999px;
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    width: 100%;
+    padding: 12px; /* Padding tombol lebih besar */
+    font-size: 1.15em; /* Ukuran font tombol */
+    margin-top: 25px; /* Jarak atas tombol */
+    border-radius: 999px;
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* Transisi halus */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Warna hover sedikit lebih gelap */
+    border-color: #0056b3;
+}
