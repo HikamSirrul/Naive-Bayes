@@ -1,17 +1,18 @@
-# Gunakan image PHP dengan ekstensi yang dibutuhkan
 FROM php:8.2-fpm
 
-# Install dependencies
+# Install dependencies sistem
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    zip \
+    unzip \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    zip \
-    unzip \
     libzip-dev \
-    libmysqlclient-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    default-libmysqlclient-dev \
     && docker-php-ext-install pdo pdo_mysql gd zip
 
 # Install Composer
@@ -26,17 +27,13 @@ COPY . .
 # Install dependency Laravel
 RUN composer install --optimize-autoloader --no-dev
 
-# Copy .env.example ke .env jika .env tidak ada
-RUN [ ! -f .env ] && cp .env.example .env || true
-
-# Generate APP_KEY jika belum ada
-RUN php artisan key:generate --ansi || true
-
-# Set permission storage dan bootstrap/cache
+# Set permission folder Laravel
 RUN chmod -R 775 storage bootstrap/cache
 
-# Expose port 8000
+# Expose port untuk Laravel
 EXPOSE 8000
 
-# Command untuk menjalankan Laravel
-CMD php artisan serve --host=0.0.0.0 --port=8000
+# Jalankan Laravel saat container run
+CMD php artisan config:cache && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=${PORT}
