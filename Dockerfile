@@ -32,3 +32,15 @@ EXPOSE 8000
 CMD php artisan config:cache && \
     php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT}
+
+
+    # Install Node.js (untuk Vite & Tailwind)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g npm
+
+# Install dependencies Vite/Tailwind
+RUN npm install
+
+# Build Vite sebelum serve
+RUN npm run build
