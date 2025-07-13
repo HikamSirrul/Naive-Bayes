@@ -11,12 +11,12 @@
         <div class="w-full bg-white shadow-lg rounded-lg p-6 mt-4 md:mt-0">
 
             {{-- Judul utama ----------------------------------------------------- --}}
-            <div class="px-4 py-8 bg-white border-b border-gray-200">
+            <div class="p-6 bg-white border-b border-gray-200">
                 <h1
-                    class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 text-center leading-relaxed max-w-5xl mx-auto">
+                    class="mt-8 text-2xl sm:text-3xl font-extrabold text-gray-900 text-center break-words max-w-screen-md mx-auto px-4">
                     PENERAPAN DATA MINING UNTUK MENGKLASIFIKASIKAN MINAT BELAJAR SISWA BERDASARKAN
-                    GAYA BELAJAR VISUAL, AUDITORI, KINESTETIK DI SDN 228 CANGKUANG
-                    DENGAN METODE NAIVE BAYES CLASSIFIER
+                    GAYA BELAJAR VISUAL, AUDITORI, KINESTETIK DI SDN 228 CANGKUANG
+                    DENGAN METODE NAIVE BAYES CLASSIFIER
                 </h1>
             </div>
 
