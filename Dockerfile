@@ -18,22 +18,17 @@ RUN apt-get update && apt-get install -y \
 # Install Composer
 COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 
-# Copy semua file project ke container
+# Copy project
 COPY . .
+COPY .env.railway .env
 
-# Install dependency Laravel
 RUN composer install --optimize-autoloader --no-dev
-
-# Set permission folder Laravel
 RUN chmod -R 775 storage bootstrap/cache
 
-# Expose port untuk Laravel
 EXPOSE 8000
 
-# Jalankan Laravel saat container run
 CMD php artisan config:cache && \
     php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT}
