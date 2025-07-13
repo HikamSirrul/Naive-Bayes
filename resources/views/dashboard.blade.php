@@ -10,22 +10,25 @@
     <div class="py-12">
         <div class="w-full bg-white shadow-lg rounded-lg p-6 mt-4 md:mt-0">
 
-            {{-- Judul utama -------------------------------------------------------}}
-            <div class="p-6 bg-white border-b border-gray-200">
-                <h1 class="mt-8 text-3xl font-extrabold text-gray-900 text-center">
+            {{-- Judul utama ----------------------------------------------------- --}}
+            <div class="px-4 py-8 bg-white border-b border-gray-200">
+                <h1
+                    class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 text-center leading-relaxed max-w-5xl mx-auto">
                     PENERAPAN DATA MINING UNTUK MENGKLASIFIKASIKAN MINAT BELAJAR SISWA BERDASARKAN
                     GAYA BELAJAR VISUAL, AUDITORI, KINESTETIK DI SDN 228 CANGKUANG
                     DENGAN METODE NAIVE BAYES CLASSIFIER
                 </h1>
             </div>
 
-            {{-- Ringkasan progres --------------------------------------------------}}
+
+            {{-- Ringkasan progres ------------------------------------------------ --}}
             <div class="mb-8 p-6 bg-blue-50 rounded-md shadow-sm">
                 <h2 class="text-2xl font-semibold text-blue-800 mb-4">
                     Ringkasan Progres
                 </h2>
 
-                <div class="w-full bg-green-100 p-4 rounded-md flex flex-col items-center justify-center text-center mb-6">
+                <div
+                    class="w-full bg-green-100 p-4 rounded-md flex flex-col items-center justify-center text-center mb-6">
                     <p class="text-4xl font-bold">{{ $jumlahSiswa }}</p>
                     <p class="text-lg text-green-600 mt-2">Jumlah Siswa</p>
                 </div>
@@ -48,7 +51,7 @@
                 </div>
             </div>
 
-            {{-- Grafik pie: hanya tampil jika ada data ---------------------------}}
+            {{-- Grafik pie: hanya tampil jika ada data ------------------------- --}}
             @if ($jumlahVisual + $jumlahAuditori + $jumlahKinestetik > 0)
                 <div class="p-6 bg-white rounded-md shadow-sm border border-gray-200">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4 text-center">
@@ -71,18 +74,18 @@
         </div>
     </div>
 
-    {{-- Script Chart.js --------------------------------------------------------}}
+    {{-- Script Chart.js ------------------------------------------------------ --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const canvas  = document.getElementById('gayaBelajarChart');
-            if (!canvas) return;   // tidak ada canvas (data kosong)
+            const canvas = document.getElementById('gayaBelajarChart');
+            if (!canvas) return; // tidak ada canvas (data kosong)
 
-            const visual     = {{ $jumlahVisual }};
-            const auditori   = {{ $jumlahAuditori }};
+            const visual = {{ $jumlahVisual }};
+            const auditori = {{ $jumlahAuditori }};
             const kinestetik = {{ $jumlahKinestetik }};
 
             const total = visual + auditori + kinestetik;
-            if (total === 0) return;  // keamanan ekstra
+            if (total === 0) return; // keamanan ekstra
 
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
@@ -110,7 +113,9 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: {
+                            position: 'bottom'
+                        },
                         title: {
                             display: true,
                             text: 'Distribusi Gaya Belajar Siswa'
