@@ -10,12 +10,13 @@ use Laravel\Fortify\Fortify;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\UpdatesUserPasswords;
 
 // Jika Anda menonaktifkan fitur ini di config/jetstream.php dan config/fortify.php,
 // Anda bisa menghapus use statements ini jika tidak digunakan di tempat lain.
 // use App\Actions\Fortify\CreateNewUser;
 // use App\Actions\Fortify\ResetUserPassword;
-// use App\Actions\Fortify\UpdateUserPassword;
+use App\Actions\Fortify\UpdateUserPassword;
 // use App\Actions\Fortify\UpdateUserProfileInformation;
 
 
@@ -35,7 +36,7 @@ class FortifyServiceProvider extends ServiceProvider
     public function boot(): void
 {
     // Set kolom username sebagai credential utama
-
+    $this->app->bind(UpdatesUserPasswords::class, UpdateUserPassword::class);
     // Gunakan view 'welcome' sebagai halaman login
     Fortify::loginView(function () {
         return view('welcome');
@@ -43,7 +44,7 @@ class FortifyServiceProvider extends ServiceProvider
 
     // Otentikasi kustom menggunakan kolom 'username'
     Fortify::authenticateUsing(function (Request $request) {
-    $user = User::where('name', $request->name)->first();
+    $user = User::where('username', $request->username)->first();
 
     if ($user && Hash::check($request->password, $user->password)) {
         return $user;
@@ -54,7 +55,7 @@ class FortifyServiceProvider extends ServiceProvider
 
     // Rate limiter
     RateLimiter::for('login', function (Request $request) {
-        $throttleKey = Str::transliterate(Str::lower($request->input('name')).'|'.$request->ip());
+        $throttleKey = Str::transliterate(Str::lower($request->input('username')).'|'.$request->ip());
         return Limit::perMinute(5)->by($throttleKey);
     });
 

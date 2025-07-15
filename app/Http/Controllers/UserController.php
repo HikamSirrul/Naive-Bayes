@@ -32,7 +32,7 @@ class UserController extends Controller
             ]);
 
             // Redirect kembali dengan pesan sukses
-            return redirect()->back()->with('success', 'User berhasil ditambahkan.');
+            return redirect()->back()->with('success', 'User has been successfully added.');
 
         } catch (\Exception $e) {
             // Tangani error lain yang mungkin terjadi (misal: koneksi database)

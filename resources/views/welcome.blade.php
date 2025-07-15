@@ -48,10 +48,10 @@
                 @endif
 
                 <div class="mb-3">
-                    <label for="name" class="form-label">Username</label>
+                    <label for="username" class="form-label">Username</label>
                     <!-- Penting: name="username" jika Anda mengonfigurasi Fortify untuk username.
                          Jika tidak, gunakan name="email" dan ubah label menjadi "Email". -->
-                    <input type="text" class="form-control form-control-lg" id="name" name="name" value="{{ old('name') }}" required autofocus autocomplete="name">
+                    <input type="text" class="form-control form-control-lg" id="username" name="username" value="{{ old('username') }}" required autofocus autocomplete="username">
                 </div>
 
                 <div class="mb-3">
