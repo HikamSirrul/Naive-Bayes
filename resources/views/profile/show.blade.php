@@ -82,8 +82,14 @@
                                 <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
                                     <div>
                                         <label for="name"
-                                            class="block text-sm font-medium text-gray-700">Username</label>
+                                            class="block text-sm font-medium text-gray-700">Name</label>
                                         <input type="text" name="name" id="name" required autofocus
+                                            class="mt-2 w-2/3 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                    </div>
+                                    <div>
+                                        <label for="username"
+                                            class="block text-sm font-medium text-gray-700">Username</label>
+                                        <input type="text" name="username" id="username" required autofocus
                                             class="mt-2 w-2/3 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                                     </div>
 

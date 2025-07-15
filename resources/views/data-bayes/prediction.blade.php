@@ -21,19 +21,19 @@
                 <label for="visual" class="block text-sm font-medium text-gray-700">Visual</label>
                 <input type="number" id="visual" name="visual"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Nilai visual"
-                    min="0" required>
+                    min="0" max="5" required>
             </div>
             <div class="mb-4">
                 <label for="auditori" class="block text-sm font-medium text-gray-700">Auditori</label>
                 <input type="number" id="auditori" name="auditori"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Nilai auditori"
-                    min="0" required>
+                    min="0" max="5" required>
             </div>
             <div class="mb-6">
                 <label for="kinestetik" class="block text-sm font-medium text-gray-700">Kinestetik</label>
                 <input type="number" id="kinestetik" name="kinestetik"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Nilai kinestetik"
-                    min="0" required>
+                    min="0" max="5" required>
             </div>
             <div class="flex justify-start">
                 <button type="submit"
@@ -66,10 +66,23 @@
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const nama = document.getElementById('nama').value;
+        const nama = document.getElementById('nama').value.trim();
         const visual = parseInt(document.getElementById('visual').value);
         const auditori = parseInt(document.getElementById('auditori').value);
         const kinestetik = parseInt(document.getElementById('kinestetik').value);
+
+        // Validasi nilai tidak boleh lebih dari 5
+        if (visual > 5 || auditori > 5 || kinestetik > 5) {
+            alert('Nilai Visual, Auditori, dan Kinestetik tidak boleh lebih dari 5.');
+            return;
+        }
+
+        // Validasi nilai tidak boleh negatif atau kosong
+        if (isNaN(visual) || isNaN(auditori) || isNaN(kinestetik) ||
+            visual < 0 || auditori < 0 || kinestetik < 0) {
+            alert('Semua nilai harus diisi dan tidak boleh negatif.');
+            return;
+        }
 
         const data = {
             Visual: visual,
@@ -79,12 +92,13 @@
 
         const max = Math.max(...Object.values(data));
         const minat_tertinggi = Object.keys(data).filter(k => data[k] === max);
-        const hasilText = `Hasil Proses menunjukkan bahwa siswa ${nama} memiliki minat belajar ${minat_tertinggi.join(' ')}.`;
+        const hasilText = `Hasil proses menunjukkan bahwa siswa <strong>${nama}</strong> memiliki minat belajar: <strong>${minat_tertinggi.join(', ')}</strong>.`;
 
         // Update hasil dan styling
-        hasilEl.textContent = hasilText;
+        hasilEl.innerHTML = hasilText;
         hasilContainer.classList.remove('bg-white');
         hasilContainer.classList.add('bg-green-100', 'text-green-900', 'border-green-400');
     });
 </script>
+
 
