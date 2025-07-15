@@ -24,6 +24,7 @@ class UserController extends Controller
 
         try {
             User::create([
+                'username' => $request->name,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password), // Direkomendasikan menggunakan Hash::make()
