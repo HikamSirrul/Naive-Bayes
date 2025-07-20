@@ -11,8 +11,6 @@ class DataSetMultipleSheet implements WithMultipleSheets
     {
         return [
             0 => new DataSetImport(), // Sheet pertama (4A)
-            1 => new DataSetImport(), // Sheet kedua (4B)
-            2 => new DataSetImport(), // Sheet ketiga (4C)
         ];
     }
 }

@@ -11,10 +11,25 @@
             Input Data Uji untuk Prediksi
         </h2>
         <form id="prediksiForm">
-            <div class="mb-4">
+            <div class="mb-4 relative"> {{-- Tambahkan class "relative" --}}
                 <label for="nama" class="block text-sm font-medium text-gray-700">Nama</label>
                 <input type="text" id="nama" name="nama"
                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Masukkan nama siswa"
+                    autocomplete="off" required>
+                <ul id="autocomplete-list"
+                    class="absolute left-0 right-0 z-10 bg-white border border-gray-300 mt-1 rounded-md hidden shadow-md max-h-48 overflow-y-auto">
+                </ul>
+            </div>
+            <div class="mb-4">
+                <label for="nama" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                <input type="text" id="jenis_kelamin" name="jenis_kelamin"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                    placeholder="Masukkan jenis kelamin siswa L/P" required>
+            </div>
+            <div class="mb-4">
+                <label for="nama" class="block text-sm font-medium text-gray-700">Kelas</label>
+                <input type="text" id="kelas" name="kelas"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Masukkan kelas siswa"
                     required>
             </div>
             <div class="mb-4">
@@ -59,6 +74,76 @@
 
 {{-- Script Prediksi Lokal --}}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const namaInput = document.getElementById('nama');
+    const list = document.getElementById('autocomplete-list');
+
+    let debounce;
+    namaInput.addEventListener('input', function () {
+        clearTimeout(debounce);
+        const query = this.value.trim();
+        if (query.length < 2) {
+            list.innerHTML = '';
+            list.classList.add('hidden');
+            return;
+        }
+
+        debounce = setTimeout(() => {
+            fetch(`/api/search-siswa?term=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    list.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(nama => {
+                            const li = document.createElement('li');
+                            li.textContent = nama;
+                            li.classList.add('px-3', 'py-2', 'hover:bg-blue-100', 'cursor-pointer');
+                            li.addEventListener('mousedown', function (e) {
+                                e.preventDefault(); // cegah blur
+                                namaInput.value = nama;
+                                list.innerHTML = '';
+                                list.classList.add('hidden');
+                                fetchDataSiswa(nama);
+                            });
+                            list.appendChild(li);
+                        });
+                        list.classList.remove('hidden');
+                    } else {
+                        list.classList.add('hidden');
+                    }
+                });
+        }, 200); // debounce agar tidak spam request
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!namaInput.contains(e.target) && !list.contains(e.target)) {
+            list.classList.add('hidden');
+        }
+    });
+
+    function fetchDataSiswa(nama) {
+        fetch(`/api/get-siswa?nama=${encodeURIComponent(nama)}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Tidak ditemukan');
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('jenis_kelamin').value = data.jenis_kelamin || '';
+                document.getElementById('kelas').value = data.kelas || '';
+                document.getElementById('visual').value = data.visual ?? '';
+                document.getElementById('auditori').value = data.auditori ?? '';
+                document.getElementById('kinestetik').value = data.kinestetik ?? '';
+            })
+            .catch(() => {
+                document.getElementById('jenis_kelamin').value = '';
+                document.getElementById('kelas').value = '';
+                document.getElementById('visual').value = '';
+                document.getElementById('auditori').value = '';
+                document.getElementById('kinestetik').value = '';
+            });
+    }
+
+    // Prediksi logic
     const form = document.getElementById('prediksiForm');
     const hasilEl = document.getElementById('hasilPrediksi');
     const hasilContainer = document.getElementById('hasilPrediksiContainer');
@@ -66,39 +151,28 @@
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const nama = document.getElementById('nama').value.trim();
-        const visual = parseInt(document.getElementById('visual').value);
-        const auditori = parseInt(document.getElementById('auditori').value);
-        const kinestetik = parseInt(document.getElementById('kinestetik').value);
+        const nama = namaInput.value.trim();
+        const visual = parseFloat(document.getElementById('visual').value);
+        const auditori = parseFloat(document.getElementById('auditori').value);
+        const kinestetik = parseFloat(document.getElementById('kinestetik').value);
 
-        // Validasi nilai tidak boleh lebih dari 5
-        if (visual > 5 || auditori > 5 || kinestetik > 5) {
-            alert('Nilai Visual, Auditori, dan Kinestetik tidak boleh lebih dari 5.');
+        const valid = [visual, auditori, kinestetik].every(n => !isNaN(n) && n >= 0 && n <= 5);
+
+        if (!valid) {
+            alert('Semua nilai VAK harus diisi dengan angka antara 0 sampai 5.');
             return;
         }
 
-        // Validasi nilai tidak boleh negatif atau kosong
-        if (isNaN(visual) || isNaN(auditori) || isNaN(kinestetik) ||
-            visual < 0 || auditori < 0 || kinestetik < 0) {
-            alert('Semua nilai harus diisi dan tidak boleh negatif.');
-            return;
-        }
-
-        const data = {
-            Visual: visual,
-            Auditori: auditori,
-            Kinestetik: kinestetik
-        };
-
+        const data = { Visual: visual, Auditori: auditori, Kinestetik: kinestetik };
         const max = Math.max(...Object.values(data));
         const minat_tertinggi = Object.keys(data).filter(k => data[k] === max);
-        const hasilText = `Hasil proses menunjukkan bahwa siswa <strong>${nama}</strong> memiliki minat belajar: <strong>${minat_tertinggi.join(', ')}</strong>.`;
 
-        // Update hasil dan styling
-        hasilEl.innerHTML = hasilText;
-        hasilContainer.classList.remove('bg-white');
-        hasilContainer.classList.add('bg-green-100', 'text-green-900', 'border-green-400');
+        hasilEl.innerHTML = `
+            Hasil proses menunjukkan bahwa siswa <strong>${nama}</strong> memiliki minat belajar:
+            <strong>${minat_tertinggi.join(', ')}</strong>.
+        `;
+        hasilContainer.className = 'bg-green-100 text-green-900 border border-green-400 p-4 rounded';
     });
+});
 </script>
-
 

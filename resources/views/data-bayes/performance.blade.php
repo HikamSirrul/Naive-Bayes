@@ -5,9 +5,9 @@
 
     {{-- Filter persentase data (tanpa form submit) --}}
     <div class="mb-4">
-        <label for="percentage_display" class="block text-gray-700 font-medium mb-1">Tampilkan data:</label>
+        <label for="percentage_display" class="block text-gray-700 font-medium mb-1">Tampilkan data testing:</label>
         <select name="percentage_display" id="percentage_display" class="border border-gray-300 rounded-md p-2 w-40">
-            @foreach ([20, 30, 40, 50, 60, 70, 80, 90] as $val)
+            @foreach ([10, 20, 30, 40, 50, 60, 70, 80, 90] as $val)
                 <option value="{{ $val }}" {{ $percentageDisplay == $val ? 'selected' : '' }}>
                     {{ $val }}%
                 </option>
@@ -16,8 +16,18 @@
     </div>
 
     <p class="mb-2 text-gray-700">
-        Menampilkan <strong id="currentPercentageDisplay">{{ ($percentageDisplay ?? 100) . '%' }}</strong> data
-        (<span id="jumlahSiswaYangDitampilkan">{{ $jumlahSiswaYangDitampilkan ?? 0 }}</span> siswa).
+        Data training:
+        <strong id="jumlahSiswaYangDitampilkan">{{ $jumlahSiswaYangDitampilkan ?? 0 }}</strong> siswa
+        (<span id="currentPercentageDisplay">{{ $percentageDisplay ?? 100 }}%</span>)
+    </p>
+    <p class="mb-4 text-gray-600">
+        Data testing:
+        <strong id="jumlahTesting">{{ $jumlahTesting ?? 0 }}</strong> siswa
+        (<span id="persentaseTesting">
+            {{ $jumlahSiswaYangDitampilkan + ($jumlahTesting ?? 0) > 0
+                ? round((($jumlahTesting ?? 0) / ($jumlahSiswaYangDitampilkan + ($jumlahTesting ?? 0))) * 100)
+                : 0 }}%
+        </span>)
     </p>
 
     {{-- Tabel hasil --}}
@@ -63,109 +73,127 @@
 
     {{-- Chart Script dan AJAX --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        let minatChart;
-        const percentageSelect = document.getElementById('percentage_display');
-        const currentPercentageDisplayEl = document.getElementById('currentPercentageDisplay');
-        const jumlahSiswaYangDitampilkanEl = document.getElementById('jumlahSiswaYangDitampilkan');
+        <script>
+            let minatChart;
 
-        const jumlahVisualEl = document.getElementById('jumlahVisual');
-        const persentaseVisualEl = document.getElementById('persentaseVisual');
-        const jumlahAuditoriEl = document.getElementById('jumlahAuditori');
-        const persentaseAuditoriEl = document.getElementById('persentaseAuditori');
-        const jumlahKinestetikEl = document.getElementById('jumlahKinestetik');
-        const persentaseKinestetikEl = document.getElementById('persentaseKinestetik');
-        const jumlahGabunganEl = document.getElementById('jumlahGabungan');
-        const persentaseGabunganEl = document.getElementById('persentaseGabungan');
+            const percentageSelect = document.getElementById('percentage_display');
+            const currentPercentageDisplayEl = document.getElementById('currentPercentageDisplay');
+            const jumlahSiswaYangDitampilkanEl = document.getElementById('jumlahSiswaYangDitampilkan');
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const ctx = document.getElementById('minatChart').getContext('2d');
-            minatChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Visual', 'Auditori', 'Kinestetik', 'Gabungan'],
-                    datasets: [{
-                        data: [
-                            {{ $jumlahVisual }},
-                            {{ $jumlahAuditori }},
-                            {{ $jumlahKinestetik }},
-                            {{ $jumlahGabungan }}
-                        ],
-                        backgroundColor: ['#34D399', '#60A5FA', '#FBBF24', '#F87171'],
-                        borderColor: '#fff',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#374151'
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed !== null) {
-                                        let total = context.dataset.data.reduce((sum, current) => sum +
-                                            current, 0);
-                                        let percentage = (context.parsed / total * 100).toFixed(2);
-                                        label += context.parsed + ' (' + percentage +'%)';
+            const jumlahVisualEl = document.getElementById('jumlahVisual');
+            const persentaseVisualEl = document.getElementById('persentaseVisual');
+            const jumlahAuditoriEl = document.getElementById('jumlahAuditori');
+            const persentaseAuditoriEl = document.getElementById('persentaseAuditori');
+            const jumlahKinestetikEl = document.getElementById('jumlahKinestetik');
+            const persentaseKinestetikEl = document.getElementById('persentaseKinestetik');
+            const jumlahGabunganEl = document.getElementById('jumlahGabungan');
+            const persentaseGabunganEl = document.getElementById('persentaseGabungan');
+
+            const jumlahTestingEl = document.getElementById('jumlahTesting');
+            const persentaseTestingEl = document.getElementById('persentaseTesting');
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const ctx = document.getElementById('minatChart').getContext('2d');
+                minatChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Visual', 'Auditori', 'Kinestetik', 'Gabungan'],
+                        datasets: [{
+                            data: [
+                                {{ $jumlahVisual }},
+                                {{ $jumlahAuditori }},
+                                {{ $jumlahKinestetik }},
+                                {{ $jumlahGabungan }}
+                            ],
+                            backgroundColor: ['#34D399', '#60A5FA', '#FBBF24', '#F87171'],
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#374151'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed !== null) {
+                                            let total = context.dataset.data.reduce((sum, current) => sum +
+                                                current, 0);
+                                            let percentage = (context.parsed / total * 100).toFixed(2);
+                                            label += context.parsed + ' (' + percentage + '%)';
+                                        }
+                                        return label;
                                     }
-                                    return label;
                                 }
                             }
                         }
                     }
-                }
-            });
-        });
-
-        percentageSelect.addEventListener('change', function() {
-            const selectedPercentage = this.value;
-            const url = `/naive-bayes?percentage_display=${selectedPercentage}&activeTab=performance`;
-
-            fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    // ✅ Tambahkan '%' setelah angka
-                    currentPercentageDisplayEl.textContent = data.percentageDisplay +'%';
-                    jumlahSiswaYangDitampilkanEl.textContent = data.jumlahSiswaYangDitampilkan;
-
-                    jumlahVisualEl.textContent = data.jumlahVisual;
-                    persentaseVisualEl.textContent = data.persentaseVisual +'%';
-                    jumlahAuditoriEl.textContent = data.jumlahAuditori;
-                    persentaseAuditoriEl.textContent = data.persentaseAuditori +'%';
-                    jumlahKinestetikEl.textContent = data.jumlahKinestetik;
-                    persentaseKinestetikEl.textContent = data.persentaseKinestetik +'%';
-                    jumlahGabunganEl.textContent = data.jumlahGabungan;
-                    persentaseGabunganEl.textContent = data.persentaseGabungan +'%';
-
-                    minatChart.data.datasets[0].data = [
-                        data.jumlahVisual,
-                        data.jumlahAuditori,
-                        data.jumlahKinestetik,
-                        data.jumlahGabungan
-                    ];
-                    minatChart.update();
-                })
-                .catch(error => {
-                    console.error('Error fetching performance data:', error);
-                    alert('Gagal memuat data kinerja. Silakan coba lagi.');
                 });
-        });
-    </script>
+            });
+
+            percentageSelect.addEventListener('change', function() {
+                const selectedPercentage = this.value;
+                const url = `/naive-bayes?percentage_display=${selectedPercentage}&activeTab=performance`;
+
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const jumlahTraining = data.jumlahSiswaYangDitampilkan ?? 0;
+                        const jumlahTesting = data.jumlahTesting ?? 0;
+                        const total = jumlahTraining + jumlahTesting;
+
+                        // Update tampilan data training dan testing
+                        jumlahSiswaYangDitampilkanEl.textContent = jumlahTraining;
+                        currentPercentageDisplayEl.textContent = Math.round(data.percentageDisplay) + '%';
+
+                        jumlahTestingEl.textContent = jumlahTesting;
+                        persentaseTestingEl.textContent = total > 0 ? Math.round((jumlahTesting / total) * 100) +
+                            '%' : '0%';
+
+                        // Update jumlah dan persentase minat
+                        jumlahVisualEl.textContent = data.jumlahVisual ?? 0;
+                        persentaseVisualEl.textContent = (data.persentaseVisual ?? 0).toFixed(2) + '%';
+
+                        jumlahAuditoriEl.textContent = data.jumlahAuditori ?? 0;
+                        persentaseAuditoriEl.textContent = (data.persentaseAuditori ?? 0).toFixed(2) + '%';
+
+                        jumlahKinestetikEl.textContent = data.jumlahKinestetik ?? 0;
+                        persentaseKinestetikEl.textContent = (data.persentaseKinestetik ?? 0).toFixed(2) + '%';
+
+                        jumlahGabunganEl.textContent = data.jumlahGabungan ?? 0;
+                        persentaseGabunganEl.textContent = (data.persentaseGabungan ?? 0).toFixed(2) + '%';
+
+                        // Update chart data
+                        minatChart.data.datasets[0].data = [
+                            data.jumlahVisual ?? 0,
+                            data.jumlahAuditori ?? 0,
+                            data.jumlahKinestetik ?? 0,
+                            data.jumlahGabungan ?? 0
+                        ];
+                        minatChart.update();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching performance data:', error);
+                        alert('Gagal memuat data kinerja. Silakan coba lagi.');
+                    });
+            });
+        </script>
+
 
 </div>

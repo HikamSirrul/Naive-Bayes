@@ -51,6 +51,7 @@
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th class="p-2 border">Nama</th>
+                                    <th class="p-2 border">Jenis Kelamin</th>
                                     <th class="p-2 border">Kelas</th>
                                     <th class="p-2 border">Hasil Visual</th>
                                     <th class="p-2 border">Hasil Audiotori</th>
@@ -61,6 +62,7 @@
                                 @foreach ($allData as $data)
                                     <tr class="hover:bg-gray-50">
                                         <td class="p-2 border">{{ $data->nama }}</td>
+                                        <td class="p-2 border">{{ $data->jenis_kelamin }}</td>
                                         <td class="p-2 border">{{ $data->kelas }}</td>
                                         <td class="p-2 border">{{ $data->hasil_visual }}</td>
                                         <td class="p-2 border">{{ $data->hasil_auditori }}</td>

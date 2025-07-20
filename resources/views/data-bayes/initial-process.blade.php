@@ -10,11 +10,12 @@
             <table class="min-w-full table-auto border-collapse text-sm text-center">
                 <thead>
                     <tr class="bg-gray-100 text-gray-800">
-                        <th colspan="4" class="border border-gray-300 px-2 py-2">Label Target</th>
+                        <th colspan="5" class="border border-gray-300 px-2 py-2">Label Target</th>
                         <th colspan="1" class="border border-gray-300 px-2 py-2">Atribut Pendukung</th>
                     </tr>
                     <tr class="bg-gray-200 text-gray-900">
                         <th class="border border-gray-300 px-2 py-1">Nama Siswa</th>
+                        <th class="border border-gray-300 px-2 py-1">Jenis Kelamin</th>
                         <th class="border border-gray-300 px-2 py-1">Visual</th>
                         <th class="border border-gray-300 px-2 py-1">Auditori</th>
                         <th class="border border-gray-300 px-2 py-1">Kinestetik</th>
@@ -25,6 +26,7 @@
                     @foreach ($allData as $siswa)
                         <tr class="hover:bg-yellow-50 cursor-default">
                             <td class="border border-gray-300 px-2 py-1">{{ $siswa->nama }}</td>
+                            <td class="border border-gray-300 px-2 py-1">{{ $siswa->jenis_kelamin }}</td>
                             <td class="border border-gray-300 px-2 py-1">{{ $siswa->hasil_visual }}</td>
                             <td class="border border-gray-300 px-2 py-1">{{ $siswa->hasil_auditori }}</td>
                             <td class="border border-gray-300 px-2 py-1">{{ $siswa->hasil_kinestetik }}</td>

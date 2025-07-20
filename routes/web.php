@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NaiveBayesController;
 use App\Http\Controllers\DashboardController;
+use App\Models\Dataset;
 
 Route::get('/', function () {
     return view('welcome');
@@ -11,6 +12,33 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/admin/users/store', [UserController::class, 'store'])->name('admin.users.store');
+});
+
+Route::get('/api/get-siswa', function (\Illuminate\Http\Request $request) {
+    $nama = $request->query('nama');
+    $data = Dataset::where('nama', $nama)->first();
+
+    if (!$data) {
+        return response()->json(['message' => 'Data tidak ditemukan'], 404);
+    }
+
+    return response()->json([
+        'jenis_kelamin' => $data->jenis_kelamin,
+        'kelas'         => $data->kelas,
+        'visual'        => $data->hasil_visual,
+        'auditori'      => $data->hasil_auditori,
+        'kinestetik'    => $data->hasil_kinestetik,
+    ]);
+});
+
+Route::get('/api/search-siswa', function (\Illuminate\Http\Request $request) {
+    $term = $request->query('term');
+
+    $results = Dataset::where('nama', 'LIKE', '%' . $term . '%')
+        ->limit(10)
+        ->pluck('nama');
+
+    return response()->json($results);
 });
 
 // Route::post('/users', [UserController::class, 'store'])->name('users.store');

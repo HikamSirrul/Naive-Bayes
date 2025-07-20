@@ -15,7 +15,7 @@ class NaiveBayesController extends Controller
         // Ambil tab aktif & persentase tampilan
         $activeTab         = $request->input('activeTab', 'dataset');
         $percentageDisplay = (int) $request->input('percentage_display', 50);
-        $percentageDisplay = max(20, min(90, $percentageDisplay));
+        $percentageDisplay = max(10, min(90, $percentageDisplay));
 
         // Ambil semua data ➜ kalkulasi 'akhir'
         $allData = Dataset::all()->map(function ($siswa) {
@@ -40,22 +40,24 @@ class NaiveBayesController extends Controller
             $jumlahTampil = 1;
         }
 
+        // Ambil data training
         $filteredDatasets = $allData->shuffle()->take($jumlahTampil);
 
-        // Hitung jumlah kategori dari filtered data
+        // Ambil data testing (sisa dari training)
+        $testingDatasets = $allData->diff($filteredDatasets);
+        $jumlahTesting   = $testingDatasets->count();
+
+        // Hitung jumlah kategori dari filtered (training) data
         $jumlahVisual = $filteredDatasets->filter(
-            fn($d) =>
-            str_contains(strtolower($d->akhir), 'v')
+            fn($d) => str_contains(strtolower($d->akhir), 'v')
         )->count();
 
         $jumlahAuditori = $filteredDatasets->filter(
-            fn($d) =>
-            str_contains(strtolower($d->akhir), 'a')
+            fn($d) => str_contains(strtolower($d->akhir), 'a')
         )->count();
 
         $jumlahKinestetik = $filteredDatasets->filter(
-            fn($d) =>
-            str_contains(strtolower($d->akhir), 'k')
+            fn($d) => str_contains(strtolower($d->akhir), 'k')
         )->count();
 
         $jumlahGabungan = $filteredDatasets->filter(function ($d) {
@@ -76,6 +78,7 @@ class NaiveBayesController extends Controller
                 'jumlahKinestetik'             => $jumlahKinestetik,
                 'jumlahGabungan'               => $jumlahGabungan,
                 'jumlahSiswaYangDitampilkan'   => $jumlahTampil,
+                'jumlahTesting'                => $jumlahTesting, // ✅ Tambahan
                 'percentageDisplay'            => $percentageDisplay,
                 'persentaseVisual'             => $persentaseVisual,
                 'persentaseAuditori'           => $persentaseAuditori,
@@ -93,6 +96,7 @@ class NaiveBayesController extends Controller
             'jumlahKinestetik'            => $jumlahKinestetik,
             'jumlahGabungan'              => $jumlahGabungan,
             'jumlahSiswaYangDitampilkan'  => $jumlahTampil,
+            'jumlahTesting'               => $jumlahTesting, // ✅ Tambahan
             'percentageDisplay'           => $percentageDisplay,
             'persentaseVisual'            => $persentaseVisual,
             'persentaseAuditori'          => $persentaseAuditori,
