@@ -57,11 +57,6 @@
                     <td class="px-4 py-2 border text-center" id="persentaseKinestetik">{{ $persentaseKinestetik }}%
                     </td>
                 </tr>
-                <tr>
-                    <td class="px-4 py-2 border text-center">Gabungan</td>
-                    <td class="px-4 py-2 border text-center" id="jumlahGabungan">{{ $jumlahGabungan }}</td>
-                    <td class="px-4 py-2 border text-center" id="persentaseGabungan">{{ $persentaseGabungan }}%</td>
-                </tr>
             </tbody>
         </table>
     </div>
@@ -73,127 +68,123 @@
 
     {{-- Chart Script dan AJAX --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            let minatChart;
+    <script>
+        let minatChart;
 
-            const percentageSelect = document.getElementById('percentage_display');
-            const currentPercentageDisplayEl = document.getElementById('currentPercentageDisplay');
-            const jumlahSiswaYangDitampilkanEl = document.getElementById('jumlahSiswaYangDitampilkan');
+        // Elemen HTML yang akan di-update
+        const percentageSelect = document.getElementById('percentage_display');
+        const currentPercentageDisplayEl = document.getElementById('currentPercentageDisplay');
+        const jumlahSiswaYangDitampilkanEl = document.getElementById('jumlahSiswaYangDitampilkan');
 
-            const jumlahVisualEl = document.getElementById('jumlahVisual');
-            const persentaseVisualEl = document.getElementById('persentaseVisual');
-            const jumlahAuditoriEl = document.getElementById('jumlahAuditori');
-            const persentaseAuditoriEl = document.getElementById('persentaseAuditori');
-            const jumlahKinestetikEl = document.getElementById('jumlahKinestetik');
-            const persentaseKinestetikEl = document.getElementById('persentaseKinestetik');
-            const jumlahGabunganEl = document.getElementById('jumlahGabungan');
-            const persentaseGabunganEl = document.getElementById('persentaseGabungan');
+        const jumlahVisualEl = document.getElementById('jumlahVisual');
+        const persentaseVisualEl = document.getElementById('persentaseVisual');
+        const jumlahAuditoriEl = document.getElementById('jumlahAuditori');
+        const persentaseAuditoriEl = document.getElementById('persentaseAuditori');
+        const jumlahKinestetikEl = document.getElementById('jumlahKinestetik');
+        const persentaseKinestetikEl = document.getElementById('persentaseKinestetik');
 
-            const jumlahTestingEl = document.getElementById('jumlahTesting');
-            const persentaseTestingEl = document.getElementById('persentaseTesting');
+        const jumlahTestingEl = document.getElementById('jumlahTesting');
+        const persentaseTestingEl = document.getElementById('persentaseTesting');
 
-            document.addEventListener('DOMContentLoaded', () => {
-                const ctx = document.getElementById('minatChart').getContext('2d');
-                minatChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Visual', 'Auditori', 'Kinestetik', 'Gabungan'],
-                        datasets: [{
-                            data: [
-                                {{ $jumlahVisual }},
-                                {{ $jumlahAuditori }},
-                                {{ $jumlahKinestetik }},
-                                {{ $jumlahGabungan }}
-                            ],
-                            backgroundColor: ['#34D399', '#60A5FA', '#FBBF24', '#F87171'],
-                            borderColor: '#fff',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    color: '#374151'
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) label += ': ';
-                                        if (context.parsed !== null) {
-                                            let total = context.dataset.data.reduce((sum, current) => sum +
-                                                current, 0);
-                                            let percentage = (context.parsed / total * 100).toFixed(2);
-                                            label += context.parsed + ' (' + percentage + '%)';
-                                        }
-                                        return label;
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('minatChart').getContext('2d');
+
+            // Gunakan data training untuk pie chart awal
+            minatChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Visual', 'Auditori', 'Kinestetik'],
+                    datasets: [{
+                        data: [
+                            {{ $jumlahVisual ?? 0 }},
+                            {{ $jumlahAuditori ?? 0 }},
+                            {{ $jumlahKinestetik ?? 0 }}
+                        ],
+                        backgroundColor: ['#34D399', '#60A5FA', '#FBBF24'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#374151'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed !== null) {
+                                        let total = context.dataset.data.reduce((sum, current) => sum +
+                                            current, 0);
+                                        let percentage = (context.parsed / total * 100).toFixed(2);
+                                        label += context.parsed + ' (' + percentage + '%)';
                                     }
+                                    return label;
                                 }
                             }
                         }
                     }
-                });
+                }
             });
+        });
 
-            percentageSelect.addEventListener('change', function() {
-                const selectedPercentage = this.value;
-                const url = `/naive-bayes?percentage_display=${selectedPercentage}&activeTab=performance`;
+        percentageSelect.addEventListener('change', function() {
+            const selectedPercentage = this.value;
+            const url = `/naive-bayes?percentage_display=${selectedPercentage}&activeTab=performance`;
 
-                fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
-                    })
-                    .then(data => {
-                        const jumlahTraining = data.jumlahSiswaYangDitampilkan ?? 0;
-                        const jumlahTesting = data.jumlahTesting ?? 0;
-                        const total = jumlahTraining + jumlahTesting;
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    const jumlahTraining = data.jumlahSiswaYangDitampilkan ?? 0;
+                    const jumlahTesting = data.jumlahTesting ?? 0;
+                    const total = jumlahTraining + jumlahTesting;
 
-                        // Update tampilan data training dan testing
-                        jumlahSiswaYangDitampilkanEl.textContent = jumlahTraining;
-                        currentPercentageDisplayEl.textContent = Math.round(data.percentageDisplay) + '%';
+                    // Update tampilan training & testing
+                    jumlahSiswaYangDitampilkanEl.textContent = jumlahTraining;
+                    currentPercentageDisplayEl.textContent = Math.round(data.percentageDisplay) + '%';
+                    jumlahTestingEl.textContent = jumlahTesting;
+                    persentaseTestingEl.textContent = total > 0 ? ((jumlahTesting / total) * 100).toFixed(2) +
+                        '%' : '0%';
 
-                        jumlahTestingEl.textContent = jumlahTesting;
-                        persentaseTestingEl.textContent = total > 0 ? Math.round((jumlahTesting / total) * 100) +
-                            '%' : '0%';
+                    // Ambil data dari TRAINING (bukan testing)
+                    jumlahVisualEl.textContent = data.jumlahVisual ?? 0;
+                    persentaseVisualEl.textContent = (data.persentaseVisual ?? 0).toFixed(2) + '%';
 
-                        // Update jumlah dan persentase minat
-                        jumlahVisualEl.textContent = data.jumlahVisual ?? 0;
-                        persentaseVisualEl.textContent = (data.persentaseVisual ?? 0).toFixed(2) + '%';
+                    jumlahAuditoriEl.textContent = data.jumlahAuditori ?? 0;
+                    persentaseAuditoriEl.textContent = (data.persentaseAuditori ?? 0).toFixed(2) + '%';
 
-                        jumlahAuditoriEl.textContent = data.jumlahAuditori ?? 0;
-                        persentaseAuditoriEl.textContent = (data.persentaseAuditori ?? 0).toFixed(2) + '%';
+                    jumlahKinestetikEl.textContent = data.jumlahKinestetik ?? 0;
+                    persentaseKinestetikEl.textContent = (data.persentaseKinestetik ?? 0).toFixed(2) + '%';
 
-                        jumlahKinestetikEl.textContent = data.jumlahKinestetik ?? 0;
-                        persentaseKinestetikEl.textContent = (data.persentaseKinestetik ?? 0).toFixed(2) + '%';
-
-                        jumlahGabunganEl.textContent = data.jumlahGabungan ?? 0;
-                        persentaseGabunganEl.textContent = (data.persentaseGabungan ?? 0).toFixed(2) + '%';
-
-                        // Update chart data
+                    // Update pie chart dengan data dari training
+                    if (minatChart && minatChart.data && minatChart.data.datasets[0]) {
                         minatChart.data.datasets[0].data = [
                             data.jumlahVisual ?? 0,
                             data.jumlahAuditori ?? 0,
-                            data.jumlahKinestetik ?? 0,
-                            data.jumlahGabungan ?? 0
+                            data.jumlahKinestetik ?? 0
                         ];
                         minatChart.update();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching performance data:', error);
-                        alert('Gagal memuat data kinerja. Silakan coba lagi.');
-                    });
-            });
-        </script>
-
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching performance data:', error);
+                    alert('Gagal memuat data kinerja. Silakan coba lagi.');
+                });
+        });
+    </script>
 
 </div>

@@ -28,17 +28,23 @@
                 @csrf
                 <div class="mb-4">
                     <label for="excel_file" class="block text-gray-700 text-sm font-bold mb-2">Pilih File Excel:</label>
-                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls" class="block w-full text-sm file:py-2 file:px-4 file:bg-blue-50 file:text-blue-700" required>
+                    <input type="file" id="excel_file" name="excel_file" accept=".xlsx, .xls"
+                        class="block w-full cursor-pointer text-sm file:py-2 file:px-4 file:bg-blue-50 file:text-blue-700 file:cursor-pointer file:rounded file:border-0"
+                        required>
                 </div>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Unggah Data</button>
+                <button type="submit"
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Unggah Data</button>
             </form>
 
             <!-- HAPUS SEMUA DATA -->
             @if (isset($allData) && $allData->isNotEmpty())
-                <form action="{{ route('naive.bayes.delete_all') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua data?')" class="mt-4">
+                <form action="{{ route('naive.bayes.delete_all') }}" method="POST"
+                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua data?')" class="mt-4">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Hapus Semua Data</button>
+                    <button type="submit"
+                        class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Hapus Semua
+                        Data</button>
                 </form>
             @endif
 

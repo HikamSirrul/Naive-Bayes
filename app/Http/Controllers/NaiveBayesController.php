@@ -12,12 +12,11 @@ class NaiveBayesController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil tab aktif & persentase tampilan
         $activeTab         = $request->input('activeTab', 'dataset');
         $percentageDisplay = (int) $request->input('percentage_display', 50);
         $percentageDisplay = max(10, min(90, $percentageDisplay));
 
-        // Ambil semua data ➜ kalkulasi 'akhir'
+        // Ambil semua data dan hitung hasil akhir
         $allData = Dataset::all()->map(function ($siswa) {
             $scores = [
                 'V' => $siswa->hasil_visual,
@@ -25,84 +24,80 @@ class NaiveBayesController extends Controller
                 'K' => $siswa->hasil_kinestetik,
             ];
 
-            $max      = max($scores);
+            $max = max($scores);
             $dominant = array_keys($scores, $max);
-
-            // Ganti nama properti jadi 'akhir'
             $siswa->akhir = implode('', $dominant);
 
             return $siswa;
         });
 
         $totalSiswaFix = $allData->count();
-        $jumlahTampil = (int) round($totalSiswaFix * ($percentageDisplay / 100));
+        $jumlahTampil  = (int) round($totalSiswaFix * ($percentageDisplay / 100));
         if ($jumlahTampil === 0 && $totalSiswaFix > 0) {
             $jumlahTampil = 1;
         }
 
-        // Ambil data training
-        $filteredDatasets = $allData->shuffle()->take($jumlahTampil);
+        // Ambil data training dan testing
+        $filteredDatasets = $allData->shuffle()->take($jumlahTampil); // Training
+        $testingDatasets  = $allData->diff($filteredDatasets);        // Testing
+        $jumlahTesting    = $testingDatasets->count();
 
-        // Ambil data testing (sisa dari training)
-        $testingDatasets = $allData->diff($filteredDatasets);
-        $jumlahTesting   = $testingDatasets->count();
+        if ($activeTab === 'performance') {
+            $testingDatasets = $testingDatasets->filter(fn($d) => in_array($d->akhir, ['V', 'A', 'K']))->values();
+            $jumlahTesting = $testingDatasets->count();
+        }
 
-        // Hitung jumlah kategori dari filtered (training) data
-        $jumlahVisual = $filteredDatasets->filter(
-            fn($d) => str_contains(strtolower($d->akhir), 'v')
-        )->count();
+        // Data training: hanya minat tunggal
+        $dataTunggalTraining = $filteredDatasets->filter(fn($d) => in_array($d->akhir, ['V', 'A', 'K']))->values();
+        $jumlahValidTraining = $dataTunggalTraining->count();
 
-        $jumlahAuditori = $filteredDatasets->filter(
-            fn($d) => str_contains(strtolower($d->akhir), 'a')
-        )->count();
+        $jumlahVisual     = $dataTunggalTraining->filter(fn($d) => $d->akhir === 'V')->count();
+        $jumlahAuditori   = $dataTunggalTraining->filter(fn($d) => $d->akhir === 'A')->count();
+        $jumlahKinestetik = $dataTunggalTraining->filter(fn($d) => $d->akhir === 'K')->count();
+        $jumlahGabungan   = $filteredDatasets->filter(fn($d) => strlen($d->akhir) >= 2)->count();
 
-        $jumlahKinestetik = $filteredDatasets->filter(
-            fn($d) => str_contains(strtolower($d->akhir), 'k')
-        )->count();
+        // Hitung persentase berdasarkan jumlah data tunggal saja
+        $persentaseVisual     = $jumlahValidTraining ? round(($jumlahVisual / $jumlahValidTraining) * 100, 2) : 0;
+        $persentaseAuditori   = $jumlahValidTraining ? round(($jumlahAuditori / $jumlahValidTraining) * 100, 2) : 0;
+        $persentaseKinestetik = $jumlahValidTraining ? round(($jumlahKinestetik / $jumlahValidTraining) * 100, 2) : 0;
+        $persentaseGabungan   = $jumlahTampil ? round(($jumlahGabungan / $jumlahTampil) * 100, 2) : 0;
 
-        $jumlahGabungan = $filteredDatasets->filter(function ($d) {
-            return strlen($d->akhir) >= 2;
-        })->count();
-
-        // Hitung persentase
-        $persentaseVisual     = $jumlahTampil ? round(($jumlahVisual     / $jumlahTampil) * 100, 2) : 0;
-        $persentaseAuditori   = $jumlahTampil ? round(($jumlahAuditori   / $jumlahTampil) * 100, 2) : 0;
-        $persentaseKinestetik = $jumlahTampil ? round(($jumlahKinestetik / $jumlahTampil) * 100, 2) : 0;
-        $persentaseGabungan   = $jumlahTampil ? round(($jumlahGabungan   / $jumlahTampil) * 100, 2) : 0;
-
-        // Jika request AJAX
         if ($request->ajax() || $request->wantsJson()) {
             return Response::json([
-                'jumlahVisual'                 => $jumlahVisual,
-                'jumlahAuditori'               => $jumlahAuditori,
-                'jumlahKinestetik'             => $jumlahKinestetik,
-                'jumlahGabungan'               => $jumlahGabungan,
-                'jumlahSiswaYangDitampilkan'   => $jumlahTampil,
-                'jumlahTesting'                => $jumlahTesting, // ✅ Tambahan
-                'percentageDisplay'            => $percentageDisplay,
-                'persentaseVisual'             => $persentaseVisual,
-                'persentaseAuditori'           => $persentaseAuditori,
-                'persentaseKinestetik'         => $persentaseKinestetik,
-                'persentaseGabungan'           => $persentaseGabungan,
+                'jumlahSiswaYangDitampilkan' => $jumlahTampil,
+                'percentageDisplay'          => $percentageDisplay,
+                'jumlahTesting'              => $jumlahTesting,
+
+                'jumlahVisual'     => $jumlahVisual,
+                'jumlahAuditori'   => $jumlahAuditori,
+                'jumlahKinestetik' => $jumlahKinestetik,
+                'jumlahGabungan'   => $jumlahGabungan,
+
+                'persentaseVisual'     => $persentaseVisual,
+                'persentaseAuditori'   => $persentaseAuditori,
+                'persentaseKinestetik' => $persentaseKinestetik,
+                'persentaseGabungan'   => $persentaseGabungan,
             ]);
         }
 
-        // Return tampilan utama (Blade)
         return view('naive-bayes-page', [
             'allData'                     => $allData,
             'activeTab'                   => $activeTab,
-            'jumlahVisual'                => $jumlahVisual,
-            'jumlahAuditori'              => $jumlahAuditori,
-            'jumlahKinestetik'            => $jumlahKinestetik,
-            'jumlahGabungan'              => $jumlahGabungan,
-            'jumlahSiswaYangDitampilkan'  => $jumlahTampil,
-            'jumlahTesting'               => $jumlahTesting, // ✅ Tambahan
-            'percentageDisplay'           => $percentageDisplay,
-            'persentaseVisual'            => $persentaseVisual,
-            'persentaseAuditori'          => $persentaseAuditori,
-            'persentaseKinestetik'        => $persentaseKinestetik,
-            'persentaseGabungan'          => $persentaseGabungan,
-            'filteredDatasets'            => $filteredDatasets,
+            'jumlahSiswaYangDitampilkan' => $jumlahTampil,
+            'jumlahTesting'              => $jumlahTesting,
+            'percentageDisplay'          => $percentageDisplay,
+
+            'jumlahVisual'     => $jumlahVisual,
+            'jumlahAuditori'   => $jumlahAuditori,
+            'jumlahKinestetik' => $jumlahKinestetik,
+            'jumlahGabungan'   => $jumlahGabungan,
+
+            'persentaseVisual'     => $persentaseVisual,
+            'persentaseAuditori'   => $persentaseAuditori,
+            'persentaseKinestetik' => $persentaseKinestetik,
+            'persentaseGabungan'   => $persentaseGabungan,
+
+            'filteredDatasets' => $filteredDatasets,
         ]);
     }
 
