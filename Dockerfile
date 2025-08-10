@@ -44,8 +44,6 @@ RUN composer install --optimize-autoloader --no-dev
 # Build Vite
 RUN npm run build
 
-RUN npm run build:tailwind
-
 RUN npm run dev
 
 # Permission storage
