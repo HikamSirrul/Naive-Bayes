@@ -40,6 +40,8 @@
             <!-- KANAN: Form Login -->
             <div class="w-1/2 p-10 flex flex-col justify-center">
                 <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
+
+
                 <form action="{{ route('login') }}" method="POST" class="space-y-4">
                     @csrf
 
