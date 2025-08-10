@@ -20,21 +20,11 @@ COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copy project
-COPY . .
-COPY .env.railway .env
+# Copy file dependency Node.js terlebih dahulu (untuk cache Docker layer)
+COPY package.json package-lock.json ./
+COPY vite.config.js tailwind.config.js postcss.config.js ./
 
-RUN composer install --optimize-autoloader --no-dev
-RUN chmod -R 775 storage bootstrap/cache
-
-EXPOSE 8000
-
-CMD php artisan config:cache && \
-    php artisan migrate --force && \
-    php artisan serve --host=0.0.0.0 --port=${PORT}
-
-
-    # Install Node.js (untuk Vite & Tailwind)
+# Install Node.js (untuk Vite & Tailwind)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g npm
@@ -42,5 +32,23 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 # Install dependencies Vite/Tailwind
 RUN npm install
 
-# Build Vite sebelum serve
+# Copy semua file project
+COPY . .
+
+# Copy environment
+COPY .env.railway .env
+
+# Install dependency PHP
+RUN composer install --optimize-autoloader --no-dev
+
+# Build Vite
 RUN npm run build
+
+# Permission storage
+RUN chmod -R 775 storage bootstrap/cache
+
+EXPOSE 8000
+
+CMD php artisan config:cache && \
+    php artisan migrate --force && \
+    php artisan serve --host=0.0.0.0 --port=${PORT}
