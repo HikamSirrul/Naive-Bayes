@@ -41,10 +41,8 @@ COPY .env.railway .env
 # Install dependency PHP
 RUN composer install --optimize-autoloader --no-dev
 
-# Build Vite
+# Build Vite (production)
 RUN npm run build
-
-RUN npm run dev
 
 # Permission storage
 RUN chmod -R 775 storage bootstrap/cache
