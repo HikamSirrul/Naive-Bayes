@@ -2,7 +2,7 @@
     class="p-6 bg-yellow-50 rounded-lg shadow-md border border-yellow-200">
 
     <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-        Halaman Initial Proses
+        Halaman Initial Proses.
     </h2>
 
     @if (isset($allData) && $allData->isNotEmpty())
@@ -40,5 +40,6 @@
         <p class="text-red-600 font-semibold mt-4">
             Belum ada data yang tersedia. Silakan unggah dataset terlebih dahulu.
         </p>
+        {{-- Update Minor Bug --}}
     @endif
 </div>
